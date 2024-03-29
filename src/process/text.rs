@@ -50,7 +50,7 @@ pub fn process_text_sign(input: &str, key: &str, format: TextSignFormat) -> Resu
             signer.sign(&mut reader)?
         }
     };
-    let signed = URL_SAFE_NO_PAD.encode(&signed);
+    let signed = URL_SAFE_NO_PAD.encode(signed);
 
     Ok(signed)
 }
