@@ -1,10 +1,10 @@
 use crate::CmdExector;
 
 use super::verify_file;
-use clap::Parser;
-use std::{fmt, str::FromStr};
+use clap::{Parser, ValueEnum};
+use std::fmt;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum OutputFormat {
     Json,
     Yaml,
@@ -18,7 +18,7 @@ pub struct CsvOpts {
     #[arg(short, long)] // "output.json".into()
     pub output: Option<String>,
 
-    #[arg(long, value_parser = parse_format, default_value = "json")]
+    #[arg(long,value_enum, default_value_t=OutputFormat::Json)]
     pub format: OutputFormat,
 
     #[arg(short, long, default_value_t = ',')]
@@ -39,33 +39,12 @@ impl CmdExector for CsvOpts {
     }
 }
 
-fn parse_format(format: &str) -> Result<OutputFormat, anyhow::Error> {
-    format.parse()
-}
-
-impl From<OutputFormat> for &'static str {
-    fn from(format: OutputFormat) -> Self {
-        match format {
-            OutputFormat::Json => "json",
-            OutputFormat::Yaml => "yaml",
-        }
-    }
-}
-
-impl FromStr for OutputFormat {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "json" => Ok(OutputFormat::Json),
-            "yaml" => Ok(OutputFormat::Yaml),
-            _ => Err(anyhow::anyhow!("Invalid format")),
-        }
-    }
-}
-
 impl fmt::Display for OutputFormat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Into::<&str>::into(*self))
+        let lowercase = match self {
+            OutputFormat::Json => "json",
+            OutputFormat::Yaml => "yaml",
+        };
+        write!(f, "{}", lowercase)
     }
 }

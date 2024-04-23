@@ -11,7 +11,7 @@ pub fn process_encode(reader: &mut dyn Read, format: Base64Format) -> Result<Str
     reader.read_to_end(&mut buf)?;
     let encoded = match format {
         Base64Format::Standard => STANDARD.encode(&buf),
-        Base64Format::UrlSafe => URL_SAFE_NO_PAD.encode(&buf),
+        Base64Format::Urlsafe => URL_SAFE_NO_PAD.encode(&buf),
     };
 
     Ok(encoded)
@@ -25,7 +25,7 @@ pub fn process_decode(reader: &mut dyn Read, format: Base64Format) -> Result<Str
 
     let decoded = match format {
         Base64Format::Standard => STANDARD.decode(buf)?,
-        Base64Format::UrlSafe => URL_SAFE_NO_PAD.decode(buf)?,
+        Base64Format::Urlsafe => URL_SAFE_NO_PAD.decode(buf)?,
     };
     // TODO: decoded data might not be string (but for this example, we assume it is)
     Ok(String::from_utf8(decoded)?)
@@ -49,7 +49,7 @@ mod tests {
     fn test_process_decode() -> Result<()> {
         let input = "fixtures/b64.txt";
         let mut reader = get_reader(input)?;
-        let format = Base64Format::UrlSafe;
+        let format = Base64Format::Urlsafe;
         process_decode(&mut reader, format)?;
 
         Ok(())
