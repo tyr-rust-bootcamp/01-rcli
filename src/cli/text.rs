@@ -5,9 +5,9 @@ use crate::{
 
 use super::{verify_file, verify_path};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use enum_dispatch::enum_dispatch;
-use std::{fmt, path::PathBuf, str::FromStr};
+use std::path::PathBuf;
 use tokio::fs;
 
 #[derive(Debug, Parser)]
@@ -27,7 +27,7 @@ pub struct TextSignOpts {
     pub input: String,
     #[arg(short, long, value_parser = verify_file)]
     pub key: String,
-    #[arg(long, default_value = "blake3", value_parser = parse_text_sign_format)]
+    #[arg(value_enum, long, default_value_t=TextSignFormat::Blake3)]
     pub format: TextSignFormat,
 }
 
@@ -39,53 +39,22 @@ pub struct TextVerifyOpts {
     pub key: String,
     #[arg(long)]
     pub sig: String,
-    #[arg(long, default_value = "blake3", value_parser = parse_text_sign_format)]
+    #[arg(value_enum, long, default_value_t=TextSignFormat::Blake3)]
     pub format: TextSignFormat,
 }
 
 #[derive(Debug, Parser)]
 pub struct KeyGenerateOpts {
-    #[arg(long, default_value = "blake3", value_parser = parse_text_sign_format)]
+    #[arg(value_enum, long, default_value_t=TextSignFormat::Blake3)]
     pub format: TextSignFormat,
     #[arg(short, long, value_parser = verify_path)]
     pub output_path: PathBuf,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum TextSignFormat {
     Blake3,
     Ed25519,
-}
-
-fn parse_text_sign_format(format: &str) -> Result<TextSignFormat, anyhow::Error> {
-    format.parse()
-}
-
-impl FromStr for TextSignFormat {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "blake3" => Ok(TextSignFormat::Blake3),
-            "ed25519" => Ok(TextSignFormat::Ed25519),
-            _ => Err(anyhow::anyhow!("Invalid format")),
-        }
-    }
-}
-
-impl From<TextSignFormat> for &'static str {
-    fn from(format: TextSignFormat) -> Self {
-        match format {
-            TextSignFormat::Blake3 => "blake3",
-            TextSignFormat::Ed25519 => "ed25519",
-        }
-    }
-}
-
-impl fmt::Display for TextSignFormat {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Into::<&str>::into(*self))
-    }
 }
 
 impl CmdExector for TextSignOpts {
