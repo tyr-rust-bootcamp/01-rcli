@@ -51,6 +51,15 @@ fn verify_path(path: &str) -> Result<PathBuf, &'static str> {
     }
 }
 
+fn verify_length(length: &str) -> Result<u8, &'static str> {
+    let len = length.parse::<u8>().map_err(|_| "Length is illegal")?;
+    if len >= 4 {
+        Ok(len)
+    } else {
+        Err("Length cannot be less than 4")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

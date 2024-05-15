@@ -1,10 +1,11 @@
+use super::verify_length;
 use crate::CmdExector;
 use clap::Parser;
 use zxcvbn::zxcvbn;
 
 #[derive(Debug, Parser)]
 pub struct GenPassOpts {
-    #[arg(short, long, default_value_t = 16)]
+    #[arg(short, long, value_parser = verify_length, default_value_t = 16)]
     pub length: u8,
 
     #[arg(long, default_value_t = true)]
